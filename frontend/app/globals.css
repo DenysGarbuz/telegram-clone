@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+:root {
+  height: 100%;
+}
+
+.form-btn {
+  @apply rounded-lg w-full font-medium h-12 text-white;
+}
+
+.auth-form {
+  @apply flex flex-col w-[350px];
+}
+
+.desc {
+  @apply text-gray-400 font-thin  leading-6;
+}
+
+.last-message {
+  background: white;
+  position: relative;
+}
+
+.last-message::before {
+  content: "";
+  width: 30px;
+  height: 27px;
+  position: absolute;
+  left: -30px;
+  bottom: 0;
+  border-bottom-right-radius: 60%;
+  
+  
+  z-index: -1;
+  box-shadow: 20px 0 0 0 white;
+}
