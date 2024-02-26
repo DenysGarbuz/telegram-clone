@@ -10,7 +10,7 @@ const ChatInput = ({ onChange, value }: ChatInputProps) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
   };
-  const input = null;
+asdfsa
   return (
     <div className="h-[60px] flex justify-center items-center">
       <input
