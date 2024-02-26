@@ -5,6 +5,8 @@ import moment from "moment";
 import Image from "next/image";
 import { FaCheck } from "react-icons/fa";
 import { LuClock3 } from "react-icons/lu";
+import ChatImages from "./chat-message-images";
+import MessageImages from "./chat-message-images";
 
 interface BodyMessageProps {
   isOwner: boolean;
@@ -14,6 +16,7 @@ interface BodyMessageProps {
   onContextMenu: (e: React.MouseEvent) => void;
   onClick: (() => void) | undefined;
   isSelected: boolean;
+  fileUrls?: string[];
 }
 
 const BodyMessage = ({
@@ -24,6 +27,7 @@ const BodyMessage = ({
   onContextMenu,
   isSelected,
   onClick,
+  fileUrls,
 }: BodyMessageProps) => {
   const {
     createdAt,
@@ -44,6 +48,9 @@ const BodyMessage = ({
     nextMessage && member._id === nextMessage?.member._id;
 
   const isEdited = !moment(createdAt).isSame(moment(updatedAt));
+
+  const imageRegex = /\.(png|jpe?g|gif|svg|webp)$/i;
+  const isOnlyImages = !fileUrls?.some((url) => !imageRegex.test(url));
 
   return (
     <div
@@ -74,7 +81,7 @@ const BodyMessage = ({
       )}
       <div
         className={cn(
-          " ml-[4.3rem] relative  overflow-hidden  rounded-tr-2xl rounded-br-2xl max-w-[550px] px-3 py-[5px]  text-[15px] ",
+          " ml-[4.3rem] relative  overflow-hidden  rounded-tr-2xl rounded-br-2xl max-w-[550px]   text-[15px] ",
           "break-all inline-block shadow-sm",
           {
             "mb-[2px]": isPrevMessageFromSameUser,
@@ -107,27 +114,29 @@ const BodyMessage = ({
             <p className="text-[14px] text-black">{messageReplyTo?.text}</p>
           </div>
         )}
+        {fileUrls && isOnlyImages && <MessageImages images={fileUrls} />}
+        <div className="mx-3 py-[6px]">
+          <span className="">{text}</span>
 
-        <span>{text}</span>
-
-        <div
-          className={cn("pl-[10px] float-right pt-[6px] flex  ", {
-            "text-green-600/80": isOwner,
-            "text-gray-400": !isOwner,
-          })}
-        >
-          {isEdited && (
-            <p className="  text-[14px] text-right  font-normal">edited</p>
-          )}
-          <p className=" ml-1 text-[14px]  text-right  font-normal">
-            {timestamp}
-          </p>
-          {isOwner && (
-            <div className="text-[13px] ml-2 font-bold flex justify-end items-center">
-              {loaded !== false ? <FaCheck /> : <LuClock3 />}
-            </div>
-          )}
-          <div className="clear-both" />
+          <div
+            className={cn("pl-[10px] float-right pt-[6px] flex  ", {
+              "text-green-600/80": isOwner,
+              "text-gray-400": !isOwner,
+            })}
+          >
+            {isEdited && (
+              <p className="  text-[14px] text-right  font-normal">edited</p>
+            )}
+            <p className=" ml-1 text-[14px]  text-right  font-normal">
+              {timestamp}
+            </p>
+            {isOwner && (
+              <div className="text-[13px] ml-2 font-bold flex justify-end items-center">
+                {loaded !== false ? <FaCheck /> : <LuClock3 />}
+              </div>
+            )}
+            <div className="clear-both" />
+          </div>
         </div>
       </div>
     </div>

@@ -12,23 +12,22 @@ const clientConfig = {
 const client = new S3Client(clientConfig);
 
 const BUCKET_NAME = config.get("bucketName");
-const GROUP_IMAGE_FOLDER = "images/groups/";
-const PROFILE_IMAGE_FOLDER = "images/profile/";
+const CHATS_FOLDER = "chats/";
 const FILE_BASE_URL = `https://${BUCKET_NAME}.s3.eu-north-1.amazonaws.com/`;
 
-const generateKey = (folder, fileName) => {
+const generateKey = (folder, id, fileName) => {
   const randomNumber = Math.floor(Math.random() * 90000 + 10000);
   const timestamp = new Date().toISOString();
-  return `${folder}${timestamp}-${randomNumber}-${fileName}`;
+  return `${folder}${id}/${timestamp}-${randomNumber}-${fileName}`;
 };
 
-async function saveGroupImage(fileName, file, contentType) {
-  const key = generateKey(GROUP_IMAGE_FOLDER, fileName);
+async function saveChatImage(chatId, fileName, buffer, contentType) {
+  const key = generateKey(CHATS_FOLDER, chatId, fileName);
 
   const commandParams = {
     Bucket: BUCKET_NAME,
     Key: key,
-    Body: file,
+    Body: buffer,
     ContentType: contentType,
   };
 
@@ -37,4 +36,23 @@ async function saveGroupImage(fileName, file, contentType) {
   return FILE_BASE_URL + key;
 }
 
-module.exports = { client, saveGroupImage };
+async function saveMultipleFiles(chatId, files) {
+  const fileUrls = [];
+  for (const file of files) {
+    const key = generateKey(CHATS_FOLDER, chatId, file.fileName);
+
+    const commandParams = {
+      Bucket: BUCKET_NAME,
+      Key: key,
+      Body: file.buffer,
+      ContentType: file.contentType,
+    };
+
+    const command = new PutObjectCommand(commandParams);
+    await client.send(command);
+    fileUrls.push(FILE_BASE_URL + key);
+  }
+  return fileUrls;
+}
+
+module.exports = { client, saveChatImage, saveMultipleFiles };

@@ -110,6 +110,7 @@ const ChatBody = ({ selectedChat, member }: ChatBodyProps) => {
                 nextMessage={i + 1 < messages.length ? messages[i + 1] : null}
                 onContextMenu={(e) => onContextMenu(e, message)}
                 isSelected={selectedMessages.some((m) => m._id === message._id)}
+                fileUrls={message.fileUrls}
               />
             ))}
           </Fragment>

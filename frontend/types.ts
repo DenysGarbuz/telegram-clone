@@ -12,6 +12,7 @@ export type Message = {
   createdAt: string;
   updatedAt: string;
   chatId: string;
+  fileUrls?: string[];
   loaded?: boolean;
   messageReplyTo?: Message;
 };

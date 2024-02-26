@@ -37,7 +37,7 @@ interface ChatInputProps {
 
 const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
   const [message, setMessage] = useState("");
-  const [file, setFile] = useState<null | File>(null);
+  const [files, setFiles] = useState<null | File[]>(null);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -52,15 +52,47 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
     setMessage(message);
   };
 
-  const handleFileSet = (file: File) => {
-    console.log(file);
-    setFile(file);
+  const handleFilesSet = async (files: File[]) => {
+    console.log(files);
+    setFiles(files);
     onOpen("sendImage");
   };
 
-  const handleSendMessage = () => {
+  const readFiles = (files: File[]) => {
+    const fileObjects = [];
+
+    const readFile = (file: File) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          let fileData = {
+            buffer: event.target?.result,
+            contentType: file.type,
+            fileName: file.name,
+          };
+
+          resolve(fileData);
+        };
+        reader.onerror = function (error) {
+          reject(error);
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    };
+
+    for (const file of files) {
+      fileObjects.push(readFile(file));
+    }
+    return Promise.all(fileObjects);
+  };
+
+  const handleSendMessage = async () => {
     console.log("MEMBER inside CHATINPUT", member);
     if (message === "") return;
+    let fileObjects = null;
+    if (files) {
+      fileObjects = await readFiles(files);
+    }
 
     const fakeId = uuidv4();
     const fakeDate = new Date().toISOString();
@@ -71,6 +103,7 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
         userId: user,
         role: "none",
       },
+      fileUrls: [],
       chatId: chatId,
       text: message,
       createdAt: fakeDate,
@@ -96,6 +129,7 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
       text: message,
       chatId,
       memberId: member._id,
+      files: fileObjects,
       messageReplyToId:
         chatMode === "reply" ? messageInProcess?._id : undefined,
     });
@@ -142,7 +176,7 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
 
   return (
     <div>
-      <SendFileModal file={file} />
+      <SendFileModal files={files} />
       {chatMode === "reply" && (
         <div className="h-[52px] flex cursor-pointer border-t-1 dark:border-r-2 dark:border-dark-200">
           <div className="flex justify-center text-light-200 items-center text-[25px] w-[58px]">
@@ -186,7 +220,7 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
           "border-t-1 dark:border-r-2": chatMode === "default",
         })}
       >
-        <Dropzone onFileSet={(file) => handleFileSet(file)}>
+        <Dropzone onFilesSet={(files) => handleFilesSet(files)}>
           <InputButton Icon={<AiOutlinePaperClip />} className="text-[28px]" />
         </Dropzone>
         <Textarea
@@ -221,21 +255,20 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
 export default ChatInput;
 
 interface DropzoneProps {
-  onFileSet: (image: File) => void;
+  onFilesSet: (files: File[]) => void;
   className?: string;
   children: React.ReactNode;
 }
-const Dropzone = ({ onFileSet, className, children }: DropzoneProps) => {
+const Dropzone = ({ onFilesSet, className, children }: DropzoneProps) => {
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    onFileSet(file);
-    console.log(file);
+    onFilesSet(acceptedFiles);
+    console.log("ACCEPTED_FILES", acceptedFiles);
   }, []);
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     noDrag: true,
-    maxFiles: 1,
+    maxFiles: 8,
     maxSize: 5 * 1024 * 1024,
   });
 
