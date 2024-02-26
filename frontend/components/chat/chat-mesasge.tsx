@@ -7,6 +7,7 @@ import { FaCheck } from "react-icons/fa";
 import { LuClock3 } from "react-icons/lu";
 import ChatImages from "./chat-message-images";
 import MessageImages from "./chat-message-images";
+import MessgeFiles from "./chat-message-files";
 
 interface BodyMessageProps {
   isOwner: boolean;
@@ -51,6 +52,7 @@ const BodyMessage = ({
 
   const imageRegex = /\.(png|jpe?g|gif|svg|webp)$/i;
   const isOnlyImages = !fileUrls?.some((url) => !imageRegex.test(url));
+  const isOnlyFiles = !fileUrls?.some((url) => imageRegex.test(url));
 
   return (
     <div
@@ -115,6 +117,7 @@ const BodyMessage = ({
           </div>
         )}
         {fileUrls && isOnlyImages && <MessageImages images={fileUrls} />}
+        {fileUrls && isOnlyFiles && <MessgeFiles files={fileUrls} />}
         <div className="mx-3 py-[6px]">
           <span className="">{text}</span>
 

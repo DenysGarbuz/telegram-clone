@@ -3,6 +3,11 @@
 import useModal from "@/hooks/useModal";
 import StaticModalWrapper from "./static-modal-wrapper";
 import StaticModalHeader from "./common/static-modal-header";
+import FooterButton from "./common/footer-button";
+import UnderlinedInput from "../underlined-input";
+import MessageImages from "../chat/chat-message-images";
+import Image from "next/image";
+import MessgeFiles from "../chat/chat-message-files";
 
 const SendFileModal = ({ files }: { files: File[] | null }) => {
   const { isOpen, types, onClose } = useModal();
@@ -12,9 +17,24 @@ const SendFileModal = ({ files }: { files: File[] | null }) => {
     <StaticModalWrapper animation="fade" isOpen={isModalOpen} onClose={onClose}>
       <div className="w-[400px] flex-flex-col">
         <StaticModalHeader name="Send Image" />
-        <div className="flex px-7">
-          <div className="bg-black w-full h-[400px] text-white">
-            {files && files[0].type}
+        <div className="px-7">
+          {files?.map((file) => {
+            const objfile = URL.createObjectURL(file);
+            if (file.type.includes("image")) {
+              return <MessageImages images={[objfile]} />;
+            } else {
+              return <MessgeFiles files={[objfile]} />;
+            }
+          })}
+          <div>
+            <UnderlinedInput label="Caption" />
+          </div>
+        </div>
+        <div className="flex justify-between px-3">
+          <FooterButton name="Add" />
+          <div>
+            <FooterButton onClick={() => onClose()} name="Cancel" />
+            <FooterButton name="Send" />
           </div>
         </div>
       </div>

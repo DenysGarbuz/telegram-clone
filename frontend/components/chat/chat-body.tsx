@@ -84,46 +84,50 @@ const ChatBody = ({ selectedChat, member }: ChatBodyProps) => {
   };
 
   return (
-    <div
-      ref={chatBodyRef}
-      className="overflow-y-auto flex flex-col flex-1 scrollbar-none bg-green-200 "
-    >
+    <div className="bg-green-200 flex flex-1 overflow-hidden">
       <MessageContextMenu
-        cursorPosition={cursorPosition}
-        isOpen={showContextMenu}
-        onClose={handleCloseContextMenu}
-      />
-      <div className="w-full flex flex-col-reverse justify-end z-[1] ">
-        {data?.pages.map(({ messages }, i) => (
-          <Fragment key={i}>
-            {messages.map((message, i) => (
-              <BodyMessage
-                onClick={
-                  chatMode === "selection"
-                    ? () => handleSelectionModeClick(message)
-                    : undefined
-                }
-                key={message._id}
-                message={message}
-                isOwner={member ? message.member._id === member._id : false}
-                prevMessage={i - 1 >= 0 ? messages[i - 1] : null}
-                nextMessage={i + 1 < messages.length ? messages[i + 1] : null}
-                onContextMenu={(e) => onContextMenu(e, message)}
-                isSelected={selectedMessages.some((m) => m._id === message._id)}
-                fileUrls={message.fileUrls}
-              />
-            ))}
-          </Fragment>
-        ))}
-      </div>
-      <button
-        onClick={() => {
-          chatBodyRef.current?.scrollTo({ top: 200, behavior: "smooth" });
-        }}
+          cursorPosition={cursorPosition}
+          isOpen={showContextMenu}
+          onClose={handleCloseContextMenu}
+        />
+      <div
+        ref={chatBodyRef}
+        className="overflow-y-auto  flex flex-col w-full  scrollbar-none bg-transparent  "
       >
-        click
-      </button>
-      <div ref={chatBottomRef} />
+        <div className="w-full flex flex-col-reverse justify-end z-[1] ">
+          {data?.pages.map(({ messages }, i) => (
+            <Fragment key={i} >
+              {messages.map((message, i) => (
+                <BodyMessage
+                  onClick={
+                    chatMode === "selection"
+                      ? () => handleSelectionModeClick(message)
+                      : undefined
+                  }
+                  key={message._id}
+                  message={message}
+                  isOwner={member ? message.member._id === member._id : false}
+                  prevMessage={i - 1 >= 0 ? messages[i - 1] : null}
+                  nextMessage={i + 1 < messages.length ? messages[i + 1] : null}
+                  onContextMenu={(e) => onContextMenu(e, message)}
+                  isSelected={selectedMessages.some(
+                    (m) => m._id === message._id
+                  )}
+                  fileUrls={message.fileUrls}
+                />
+              ))}
+            </Fragment>
+          ))}
+        </div>
+        <button
+          onClick={() => {
+            chatBodyRef.current?.scrollTo({ top: 200, behavior: "smooth" });
+          }}
+        >
+          click
+        </button>
+        <div ref={chatBottomRef} />
+      </div>
     </div>
   );
 };

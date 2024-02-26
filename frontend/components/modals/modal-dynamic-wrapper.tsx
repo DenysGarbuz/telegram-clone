@@ -79,7 +79,7 @@ const DynamicModalWrapper = ({
     <motion.div
       onClick={handleClick}
       className={cn(
-        "absolute w-full h-full z-[4]",
+        "absolute w-full h-full z-[4] ",
 
         "pt-[40px]"
       )}
@@ -94,7 +94,7 @@ const DynamicModalWrapper = ({
       <motion.div
         ref={modalDiv}
         className={cn(
-          "w-[438px]  shadow-md relative  shadow-black/20 mx-auto rounded-t-lg bg-white dark:bg-dark-100 flex flex-col max-h-full px-[3px] pb-[15px] border-white dark:border-dark-100",
+          "w-[438px]  shadow-md relative  overflow-hidden shadow-black/20 mx-auto rounded-t-lg bg-white dark:bg-dark-100 flex flex-col max-h-full px-[3px] pb-[15px] border-white dark:border-dark-100",
           !isScrolling && "rounded-b-lg",
           padding > 0 && "rounded-b-lg"
         )}

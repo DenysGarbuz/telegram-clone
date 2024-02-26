@@ -1,4 +1,8 @@
 import { SelectedChat } from "@/types";
+import {
+  InfiniteData,
+  InfiniteQueryObserverResult,
+} from "@tanstack/react-query";
 import { Message } from "postcss";
 import { useEffect, useState } from "react";
 
@@ -22,15 +26,24 @@ export const useChatScroll = ({
   isFetching,
 }: UseChatScrollProps) => {
   const [initialized, setInitialized] = useState(false);
+  const [scrollHeight, setScrollHeight] = useState(
+    chatBodyRef.current?.scrollHeight
+  );
+  
 
   useEffect(() => {
     const chatDiv = chatBodyRef.current;
 
-    const handleScroll = () => {
-      const shouldLoadMore = chatDiv?.scrollTop === 0;
+    const handleScroll = async () => {
+      const shouldLoadMore = chatBodyRef.current?.scrollTop === 0;
       if (shouldLoadMore && hasMoreMessages) {
+      
         loadMore();
       }
+      // if (shouldLoadMore) {
+      //   const scrollHeight = chatBodyRef.current?.scrollHeight;
+      //   chatBodyRef.current?.scrollTo({ top: +300, behavior: "smooth" });
+      // }
     };
 
     chatDiv?.addEventListener("scroll", handleScroll);
