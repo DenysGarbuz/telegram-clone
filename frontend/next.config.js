@@ -5,7 +5,7 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "testimagetelegrambucket.s3.eu-north-1.amazonaws.com",
-        pathname: "/images/**",
+        pathname: "**",
       },
     ],
   },

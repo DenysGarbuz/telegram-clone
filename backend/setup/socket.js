@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const validateId = require("../utils/validateId");
 const jwt = require("jsonwebtoken");
+const { saveMultipleFiles } = require("./s3client");
 
 module.exports = function (server) {
   const { Server } = require("socket.io");
@@ -9,7 +10,6 @@ module.exports = function (server) {
   const Member = require("../models/Member");
   const Chat = require("../models/Chat");
   const { User } = require("../models/User");
-  
 
   if (!config.has("frontendUrl")) {
     console.error("frontendUrl is missing");
@@ -59,8 +59,8 @@ module.exports = function (server) {
 
     socket.on(
       "message:add",
-      async ({ text, chatId, memberId, messageReplyToId, fakeId }) => {
-       
+      async ({ text, chatId, memberId, messageReplyToId, fakeId, files }) => {
+        console.log(files);
         console.log("received message: " + text + " " + chatId);
         console.log("current rooms", socket.rooms);
 
@@ -71,9 +71,15 @@ module.exports = function (server) {
         //   return;
         // }
 
+        let fileUrls = null;
+        if (files && files.length > 0) {
+          fileUrls = await saveMultipleFiles(chat._id, files);
+        }
+
         const message = new Message({
           text,
           chatId,
+          fileUrls,
           member: memberId,
           messageReplyTo: messageReplyToId,
         });

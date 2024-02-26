@@ -10,7 +10,7 @@ const validateId = require("../utils/validateId");
 const Roles = require("../roles");
 const Message = require("../models/Message");
 const Types = require("../types");
-const { saveGroupImage } = require("../setup/s3client");
+const { saveChatImage } = require("../setup/s3client");
 const multer = require("multer");
 const upload = multer();
 const _ = require("lodash");
@@ -132,15 +132,18 @@ router.post("/", [auth, upload.single("image")], async (req, res) => {
   }
 
   let imageUrl = null;
+
+  let chat = new Chat();
   if (image) {
-    imageUrl = await saveGroupImage(
+    imageUrl = await saveChatImage(
+      chat._id,
       image.originalname,
       image.buffer,
       image.mimetype
     );
   }
 
-  const chat = new Chat({
+  chat.set({
     name,
     userId,
     type,

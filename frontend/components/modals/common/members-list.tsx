@@ -46,7 +46,7 @@ const ContactItem = ({
         className="w-[45px] h-[45px] text-[20px] mx-4 rounded-full bg-black"
       />
       <div className="flex flex-col ">
-        <p className="text-[14px] font-medium">{name}</p>
+        <p className="text-[14px] font-semibold">{name}</p>
         <p className="text-gray-400 font-light text-sm">{activity}</p>
       </div>
     </div>
