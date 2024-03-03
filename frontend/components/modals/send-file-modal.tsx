@@ -9,12 +9,25 @@ import MessageImages from "../chat/chat-message-images";
 import Image from "next/image";
 import MessgeFiles from "../chat/chat-message-files";
 
-const SendFileModal = ({ files }: { files: File[] | null }) => {
-  const { isOpen, types, onClose } = useModal();
+const SendFileModal = ({
+  files,
+  onSendClick,
+  onClose,
+}: {
+  files: File[] | null;
+  onSendClick: () => void;
+  onClose: () => void;
+}) => {
+  const { isOpen, types, onClose: onModalClose } = useModal();
   const isModalOpen = isOpen && types.includes("sendImage");
 
+  const handleClose = () => {
+    onClose();
+    onModalClose();
+  };
+
   return (
-    <StaticModalWrapper animation="fade" isOpen={isModalOpen} onClose={onClose}>
+    <StaticModalWrapper animation="fade" isOpen={isModalOpen} onClose={handleClose}>
       <div className="w-[400px] flex-flex-col">
         <StaticModalHeader name="Send Image" />
         <div className="px-7">
@@ -33,8 +46,8 @@ const SendFileModal = ({ files }: { files: File[] | null }) => {
         <div className="flex justify-between px-3">
           <FooterButton name="Add" />
           <div>
-            <FooterButton onClick={() => onClose()} name="Cancel" />
-            <FooterButton name="Send" />
+            <FooterButton onClick={handleClose} name="Cancel" />
+            <FooterButton onClick={onSendClick} name="Send" />
           </div>
         </div>
       </div>
