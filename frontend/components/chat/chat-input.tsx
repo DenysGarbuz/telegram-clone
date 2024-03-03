@@ -24,10 +24,10 @@ import { v4 as uuidv4 } from "uuid";
 import { extractNameOrEmail } from "@/utils/messages";
 import { IoSend } from "react-icons/io5";
 
-import moment from "moment";
 import { useDropzone } from "react-dropzone";
 import useModal from "@/hooks/useModal";
 import SendFileModal from "../modals/send-file-modal";
+import { sendMessage } from "@/utils/messages";
 
 interface ChatInputProps {
   chatId: string;
@@ -36,20 +36,19 @@ interface ChatInputProps {
 }
 
 const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
-  const [message, setMessage] = useState("");
+  const [text, setText] = useState("");
   const [files, setFiles] = useState<null | File[]>(null);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const queryClient = useQueryClient();
   const { socket } = useSocket();
   const { onOpen, types, isOpen } = useModal();
   const { chatMode, messageInProcess, setChatMode } = useChat();
-  const isModalOpen = isOpen && types.includes("sendImage");
+  const queryClient = useQueryClient();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const message = e.target.value;
-    setMessage(message);
+    const text = e.target.value;
+    setText(text);
   };
 
   const handleFilesSet = async (files: File[]) => {
@@ -58,87 +57,10 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
     onOpen("sendImage");
   };
 
-  const readFiles = (files: File[]) => {
-    const fileObjects = [];
-
-    const readFile = (file: File) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = function (event) {
-          let fileData = {
-            buffer: event.target?.result,
-            contentType: file.type,
-            fileName: file.name,
-          };
-
-          resolve(fileData);
-        };
-        reader.onerror = function (error) {
-          reject(error);
-        };
-        reader.readAsArrayBuffer(file);
-      });
-    };
-
-    for (const file of files) {
-      fileObjects.push(readFile(file));
-    }
-    return Promise.all(fileObjects);
-  };
-
-  const handleSendMessage = async () => {
-    console.log("MEMBER inside CHATINPUT", member);
-    if (message === "") return;
-    let fileObjects = null;
-    if (files) {
-      fileObjects = await readFiles(files);
-    }
-
-    const fakeId = uuidv4();
-    const fakeDate = new Date().toISOString();
-    const optimisticMessage: Message = {
-      _id: fakeId,
-      member: {
-        _id: member._id,
-        userId: user,
-        role: "none",
-      },
-      fileUrls: [],
-      chatId: chatId,
-      text: message,
-      createdAt: fakeDate,
-      updatedAt: fakeDate,
-      loaded: false,
-      messageReplyTo:
-        chatMode === "reply" && messageInProcess ? messageInProcess : undefined,
-    };
-
-    queryClient.setQueryData(["messages", chatId], (oldData: any) => {
-      const newPages = [...oldData.pages];
-      newPages[0] = {
-        ...newPages[0],
-        messages: [optimisticMessage, ...newPages[0].messages],
-      };
-
-      return { ...oldData, pages: newPages };
-    });
-
-    // console.log(queryClient.getQueryData(["messages", chatId]));
-    socket?.emit("message:add", {
-      fakeId,
-      text: message,
-      chatId,
-      memberId: member._id,
-      files: fileObjects,
-      messageReplyToId:
-        chatMode === "reply" ? messageInProcess?._id : undefined,
-    });
-  };
-
   const handleEditMessage = () => {
     socket?.emit("message:edit", {
       messageId: messageInProcess?._id,
-      text: message,
+      text,
       chatId,
     });
   };
@@ -149,22 +71,32 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
         handleEditMessage();
         break;
       default:
-        handleSendMessage();
+        sendMessage({
+          chatId,
+          files,
+          member,
+          text,
+          user,
+          socket,
+          chatMode,
+          queryClient,
+          messageInProcess,
+        });
     }
     setChatMode("default");
-    setMessage("");
+    setText("");
   };
 
   useEffect(() => {
     inputRef.current?.focus();
     if (chatMode === "edit") {
-      setMessage(messageInProcess?.text ?? "");
+      setText(messageInProcess?.text ?? "");
     }
   }, [chatMode]);
 
   const handleCancel = () => {
     setChatMode("default");
-    setMessage("");
+    setText("");
   };
 
   const handlePressEnter = (e: React.KeyboardEvent) => {
@@ -176,7 +108,11 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
 
   return (
     <div>
-      <SendFileModal files={files} />
+      <SendFileModal
+        onClose={() => setFiles(null)}
+        onSendClick={handleMessage}
+        files={files}
+      />
       {chatMode === "reply" && (
         <div className="h-[52px] flex cursor-pointer border-t-1 dark:border-r-2 dark:border-dark-200">
           <div className="flex justify-center text-light-200 items-center text-[25px] w-[58px]">
@@ -229,7 +165,7 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
           onChange={handleChange}
           className=""
           minRows={1}
-          value={message}
+          value={text}
           placeholder="Write a message..."
           classNames={{
             inputWrapper: " shadow-none rounded-none px-2",
@@ -238,7 +174,7 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
           maxRows={10}
         />
         <InputButton Icon={<PiSmiley />} className="text-[28px]" />
-        {message.length > 0 ? (
+        {text.length > 0 ? (
           <InputButton
             onClick={handleMessage}
             Icon={<IoSend />}
