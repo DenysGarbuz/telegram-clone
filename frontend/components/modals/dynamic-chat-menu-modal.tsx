@@ -14,14 +14,16 @@ import { useChat } from "@/hooks/use-chat";
 import Image from "next/image";
 import Avatar from "../avatar";
 import { cn } from "@nextui-org/react";
-import MembersMenu from "./common/members-menu";
+import MembersMenu from "./modal-menu/members-menu";
 import MembersList from "./common/members-list";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { RxCross2 } from "react-icons/rx";
+import DynamicChatMenuButton from "./common/dynamic-chat-menu-button";
+import DynamicModalHeader from "./common/dynamic-modal-header";
 
 type Menu = "default" | "members" | "images";
 
-const ChatMenuModal = () => {
+const DynamicChatMenuModal = () => {
   const { chat } = useChat();
   const [isLoading, setIsLoading] = useState(false);
   const [currentMenu, setCurrentMenu] = useState<Menu>("default");
@@ -58,13 +60,6 @@ const ChatMenuModal = () => {
       isOpen={isModalOpen}
       onClose={onClose}
       animation="fade"
-      header={
-        <Header
-          name={header as string}
-          currentMenu={currentMenu}
-          onBackClick={() => setCurrentMenu("default")}
-        />
-      }
     >
       {currentMenu === "default" && (
         <InitialMenu setCurrentMenu={setCurrentMenu} />
@@ -74,7 +69,7 @@ const ChatMenuModal = () => {
   );
 };
 
-export default ChatMenuModal;
+export default DynamicChatMenuModal;
 
 interface InitialMenuProps {
   setCurrentMenu: (menu: Menu) => void;
@@ -87,6 +82,12 @@ const InitialMenu = ({ setCurrentMenu }: InitialMenuProps) => {
 
   return (
     <>
+      <DynamicModalHeader
+        name="Name"
+        onCloseClick={() => {
+          null;
+        }}
+      />
       <HeadLine
         name={chat?.name}
         count={chat?.members.length}
@@ -94,10 +95,13 @@ const InitialMenu = ({ setCurrentMenu }: InitialMenuProps) => {
       />
       <div className="bg-gray-200/50 w-full h-[10px] "></div>
       <div className="flex flex-col">
-        <MenuOption name="1568 photos" Icon={<SlPicture />} />
-        <MenuOption name="Item" Icon={<TbPhoto />} />
-        <MenuOption name="Item" />
-        <MenuOption name="Item" />
+        <DynamicChatMenuButton name="1568 photos" Icon={<SlPicture />} />
+        <DynamicChatMenuButton name="videos" Icon={<TbPhoto />} />
+        <DynamicChatMenuButton name="files" />
+        <DynamicChatMenuButton name="audio files" />
+        <DynamicChatMenuButton name="shared links" />
+        <DynamicChatMenuButton name="voice messages" />
+        <DynamicChatMenuButton name="GIFs" />
       </div>
       <div className="bg-gray-6600/50 w-full h-[10px] "></div>
       <div
@@ -113,28 +117,6 @@ const InitialMenu = ({ setCurrentMenu }: InitialMenuProps) => {
       </div>
       <MembersList members={chat.members} />
     </>
-  );
-};
-
-const MenuOption = ({
-  name,
-  Icon,
-  onClick,
-}: {
-  name: string;
-  Icon: React.ReactNode;
-  onClick: () => void;
-}) => {
-  return (
-    <div
-      onClick={undefined}
-      className={cn(
-        "w-full cursor-pointer hover:bg-gray-100 h-[40px] flex justify-left items-center text-gray-800"
-      )}
-    >
-      <div className="w-[100px] flex justify-center text-[20px]  ">{Icon}</div>
-      <p className="w-full text-[14px] font-normal">{name}</p>
-    </div>
   );
 };
 
@@ -157,7 +139,9 @@ const Header = ({
           <IoArrowBackOutline />
         </div>
       )}
-      <h2 className="flex-1 ml-[30px] font-medium text-[18px] text-gray-700">{name}</h2>
+      <h2 className="flex-1 ml-[30px] font-medium text-[18px] text-gray-700">
+        {name}
+      </h2>
       <div className=" flex justify-center items-center">
         <button className="w-[50px] text-[25px] text-gray-400 hover:brightness-90 ">
           <RxCross2 />

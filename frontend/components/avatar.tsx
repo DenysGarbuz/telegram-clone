@@ -3,7 +3,7 @@ import Image from "next/image";
 
 interface AvatarProps {
   name: string;
-  imageUrl: string;
+  imageUrl?: string | null;
   className?: string;
 }
 
