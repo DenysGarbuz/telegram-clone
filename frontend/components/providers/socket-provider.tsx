@@ -10,6 +10,7 @@ interface ClientToServer {
   joined: (chatId: string) => void;
   leaving: (chatId: string) => void;
   "message:add": ({}: any) => void;
+  "message:edit": ({}: any) => void;
 }
 interface MySocket extends Socket<ClientToServer> {
   currentChatId: string;

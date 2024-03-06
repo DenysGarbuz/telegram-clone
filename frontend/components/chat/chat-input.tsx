@@ -15,7 +15,6 @@ import { PiSmiley } from "react-icons/pi";
 import { useSocket } from "../providers/socket-provider";
 import { Member, Message, User } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
-import { randomUUID } from "crypto";
 import { useChat } from "@/hooks/use-chat";
 import { IoArrowUndo } from "react-icons/io5";
 import { RxCross2 } from "react-icons/rx";
@@ -46,6 +45,13 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
   const { chatMode, messageInProcess, setChatMode } = useChat();
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    inputRef.current?.focus();
+    if (chatMode === "edit") {
+      setText(messageInProcess?.text ?? "");
+    }
+  }, [chatMode]);
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     setText(text);
@@ -63,6 +69,18 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
       text,
       chatId,
     });
+  };
+
+  const handleCancel = () => {
+    setChatMode("default");
+    setText("");
+  };
+
+  const handlePressEnter = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleMessage();
+    }
   };
 
   const handleMessage = () => {
@@ -85,25 +103,6 @@ const ChatInput = ({ chatId, member, user }: ChatInputProps) => {
     }
     setChatMode("default");
     setText("");
-  };
-
-  useEffect(() => {
-    inputRef.current?.focus();
-    if (chatMode === "edit") {
-      setText(messageInProcess?.text ?? "");
-    }
-  }, [chatMode]);
-
-  const handleCancel = () => {
-    setChatMode("default");
-    setText("");
-  };
-
-  const handlePressEnter = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleMessage();
-    }
   };
 
   return (

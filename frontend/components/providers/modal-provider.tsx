@@ -7,10 +7,11 @@ import { useAppDispatch, useAppSelector } from "@/hooks/store";
 import { cn } from "@nextui-org/react";
 import DeleteGroupModal from "../modals/delete-group-modal";
 import LeaveChatModal from "../modals/leave-chat-modal";
-import ChatMenuModal from "../modals/chat-menu-modal";
+
 import ManageChatModal from "../modals/manage-chat-modal";
 import DeleteMessageModal from "../modals/delete-message-modal";
 import SendFileModal from "../modals/send-file-modal";
+import DynamicChatMenuModal from "../modals/dynamic-chat-menu-modal";
 
 const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -29,7 +30,7 @@ const ModalProvider = () => {
       <CreateChatModal />
       <DeleteGroupModal />
       <LeaveChatModal />
-      <ChatMenuModal />
+      <DynamicChatMenuModal />
       <ManageChatModal />
       <DeleteMessageModal />
       {/* <SendFileModal /> */}

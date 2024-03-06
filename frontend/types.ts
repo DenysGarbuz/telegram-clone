@@ -6,7 +6,7 @@ export type User = {
 };
 
 export type Message = {
-  member: Member | string;
+  member: Member
   text: string;
   _id: string;
   createdAt: string;
@@ -20,7 +20,7 @@ export type Message = {
 export type Member = {
   _id: string;
   isAdmin: boolean;
-  userId: User | string;
+  userId: User 
   chatId: string;
   rights: {
     canAddMembers: boolean;

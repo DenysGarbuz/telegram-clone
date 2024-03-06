@@ -1,7 +1,6 @@
 import { Member } from "@/types";
 import MembersList from "../common/members-list";
 import { useState } from "react";
-import { Avatar } from "@nextui-org/react";
 import FooterButton from "../common/footer-button";
 import { LiaSearchSolid } from "react-icons/lia";
 import { RxCross2 } from "react-icons/rx";
@@ -14,6 +13,7 @@ import axiosConfig from "@/utils/axios-config";
 import queryString from "query-string";
 import { headers } from "next/headers";
 import useToken from "@/hooks/useToken";
+import Avatar from "@/components/avatar";
 
 interface AdministratorsMenuProps {
   members: Member[];

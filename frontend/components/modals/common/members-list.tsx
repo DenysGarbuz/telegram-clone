@@ -26,7 +26,7 @@ const MembersList = ({
 interface ContactItemProps {
   name: string;
   activity: string;
-  imageUrl: string;
+  imageUrl: string | null;
   onClick?: () => void;
 }
 const ContactItem = ({

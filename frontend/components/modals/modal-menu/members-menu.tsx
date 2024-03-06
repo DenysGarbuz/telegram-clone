@@ -1,8 +1,17 @@
 import { ChangeEvent, useState } from "react";
-import MembersList from "./members-list";
+import MembersList from "../common/members-list";
 import { Member } from "@/types";
+import DynamicModalHeader from "../common/dynamic-modal-header";
 
-const MembersMenu = ({ members }: { members: Member[] }) => {
+const MembersMenu = ({
+  members,
+  onBackClick,
+  onCloseClick
+}: {
+  members: Member[];
+  onBackClick?: () => void;
+  onCloseClick?: () => void;
+}) => {
   const [search, setSearch] = useState("");
 
   const filteredMembers = members.filter((member) => {
@@ -17,6 +26,7 @@ const MembersMenu = ({ members }: { members: Member[] }) => {
 
   return (
     <div>
+      <DynamicModalHeader name="Name" />
       <input onChange={handleChange} type="text" />
       <MembersList members={filteredMembers} />;
     </div>
