@@ -86,8 +86,8 @@ const Menu = () => {
             />
             <MenuItem
               Icon={<RiGroupLine />}
-              name="New Gruop"
-              type="createFolder"
+              name="Settings"
+              type="settings"
             />
 
             <ThemeSwitcher />

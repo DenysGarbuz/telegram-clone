@@ -84,7 +84,7 @@ const ChatBody = ({ selectedChat, member }: ChatBodyProps) => {
   };
 
   return (
-    <div className="bg-green-200 flex flex-1 overflow-hidden">
+    <div className="  bg-gradient-to-br from-lime-200  via-green-300 to-lime-200 dark:bg-dark-100  flex flex-1 overflow-hidden">
       <MessageContextMenu
           cursorPosition={cursorPosition}
           isOpen={showContextMenu}
