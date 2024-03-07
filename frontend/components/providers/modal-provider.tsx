@@ -12,6 +12,8 @@ import ManageChatModal from "../modals/manage-chat-modal";
 import DeleteMessageModal from "../modals/delete-message-modal";
 import SendFileModal from "../modals/send-file-modal";
 import DynamicChatMenuModal from "../modals/dynamic-chat-menu-modal";
+import Test from "../modals/common/test";
+import SettingsModal from "../modals/settings-modal";
 
 const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -33,6 +35,7 @@ const ModalProvider = () => {
       <DynamicChatMenuModal />
       <ManageChatModal />
       <DeleteMessageModal />
+      <SettingsModal />
       {/* <SendFileModal /> */}
     </>
   );

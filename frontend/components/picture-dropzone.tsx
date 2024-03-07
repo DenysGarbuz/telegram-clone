@@ -6,7 +6,7 @@ import { MdCameraAlt } from "react-icons/md";
 
 interface PictureDropzoneProps {
   setImage: (image: File) => void;
-  image: File | null;
+  image: string | null;
   className?: string;
 }
 
@@ -42,7 +42,7 @@ const PictureDropzone = ({
         {image ? (
           <Image
             alt="image"
-            src={URL.createObjectURL(image)}
+            src={image}
             fill
             className="rounded-full"
           />

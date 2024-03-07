@@ -2,11 +2,14 @@ import { ChangeEvent, useState } from "react";
 import MembersList from "../common/members-list";
 import { Member } from "@/types";
 import DynamicModalHeader from "../common/dynamic-modal-header";
+import { DynamicModalBody } from "../modal-dynamic-wrapper";
+import Search from "../common/search";
+import { motion } from "framer-motion";
 
 const MembersMenu = ({
   members,
   onBackClick,
-  onCloseClick
+  onCloseClick,
 }: {
   members: Member[];
   onBackClick?: () => void;
@@ -25,11 +28,22 @@ const MembersMenu = ({
   };
 
   return (
-    <div>
-      <DynamicModalHeader name="Name" />
-      <input onChange={handleChange} type="text" />
-      <MembersList members={filteredMembers} />;
-    </div>
+    <motion.div
+    // animate={{ x: 0, opacity: 1 }}
+    // exit={{ x: "-30%", opacity: 0 }}
+    // transition={{ duration: 0.1 }}
+    >
+      <DynamicModalHeader
+        onBackClick={onBackClick}
+        onCloseClick={onCloseClick}
+        name="Name"
+      />
+      <DynamicModalBody>
+        <Search />
+        <div className="w-full border-t-1 h-[10px] mt-1" />
+        <MembersList members={filteredMembers} />
+      </DynamicModalBody>
+    </motion.div>
   );
 };
 

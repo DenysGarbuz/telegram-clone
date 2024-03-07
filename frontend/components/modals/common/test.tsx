@@ -1,6 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
+import {
+  AnimationControls,
+  TargetAndTransition,
+  Variants,
+  motion,
+} from "framer-motion";
 
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "@nextui-org/react";
@@ -22,19 +27,14 @@ const variants = {
   fade: { x: 0, opacity: 0 },
 };
 
-interface DynamicModalWrapperProps {
+
+interface TestP {
   children: ReactNode;
   isOpen: boolean;
   onClose: () => void;
   header?: ReactNode;
-  animation?: "fade" | "slide";
 }
-const DynamicModalWrapper = ({
-  children,
-  onClose,
-  isOpen,
-  animation = "fade",
-}: DynamicModalWrapperProps) => {
+const Test = ({ children, onClose, isOpen }: TestP) => {
   const { types } = useModal();
   const [isScrolling, setIsScrolling] = useState(false);
   const modalDiv = useRef<HTMLDivElement>(null);
@@ -77,7 +77,7 @@ const DynamicModalWrapper = ({
           !isScrolling && "rounded-b-lg"
         )}
         variants={variants}
-        initial={animation}
+        initial="fade"
         animate="final"
       >
         {types.length > 1 && (
@@ -89,7 +89,7 @@ const DynamicModalWrapper = ({
   ) : null;
 };
 
-export default DynamicModalWrapper;
+export default Test;
 
 export const DynamicModalBody = ({
   children,
@@ -145,10 +145,7 @@ export const DynamicModalBody = ({
       className={cn(
         "overflow-y-scroll ",
         "scrollbar-thumb-rounded-full scrollbar-track-rounded-full hover:scrollbar scrollbar-w-[5px]",
-        "scrollbar-thumb-gray-800/40 scrollbar-track-slate-300/30 dark:scrollbar-thumb-white/30 dark:scrollbar-track-white/20",
-        {
-          "border-t-1": height,
-        }
+        "scrollbar-thumb-gray-800/40 scrollbar-track-slate-300/30 dark:scrollbar-thumb-white/30 dark:scrollbar-track-white/20"
       )}
     >
       {children}

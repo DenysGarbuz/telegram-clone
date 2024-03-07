@@ -17,6 +17,7 @@ import { VscKey } from "react-icons/vsc";
 import { RiLink } from "react-icons/ri";
 import { RiShieldStarLine, RiGroupLine } from "react-icons/ri";
 import { PiNotepad } from "react-icons/pi";
+import FooterButton from "./common/footer-button";
 
 type Menu = "default" | "administrators";
 
@@ -89,10 +90,10 @@ const ManageChatInitialMenu = ({ setCurrentMenu, chat }: InitialMenuProps) => {
         <div className="flex flex-col ">
           <div className="flex  ">
             <div className="ml-5 mr-8">
-              <PictureDropzone />
+              <PictureDropzone image={chat.imageUrl} />
             </div>
             <div>
-              <UnderlinedInput label="Channel name" />
+              <UnderlinedInput value={chat.name} label="Channel name" />
             </div>
           </div>
           <div className="px-7 py-3">Description</div>
@@ -114,6 +115,10 @@ const ManageChatInitialMenu = ({ setCurrentMenu, chat }: InitialMenuProps) => {
           </MenuOption>
           <MenuOption Icon={<RiGroupLine />}>Members</MenuOption>
           <MenuOption Icon={<PiNotepad />}>Recent Actions</MenuOption>
+        </div>
+        <div className="items-center flex justify-end   px-3">
+          <FooterButton name="Cancel" />
+          <FooterButton name="Save" />
         </div>
       </div>
     </>

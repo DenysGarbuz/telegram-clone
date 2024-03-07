@@ -57,3 +57,4 @@ export type ModalType =
   | "manageChat"
   | "deleteMessage"
   | "sendImage"
+  | "settings"
