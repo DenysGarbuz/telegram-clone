@@ -18,6 +18,7 @@ interface BodyMessageProps {
   onClick: (() => void) | undefined;
   isSelected: boolean;
   fileUrls?: string[];
+  channelName?: string;
 }
 
 const BodyMessage = ({
@@ -29,6 +30,7 @@ const BodyMessage = ({
   isSelected,
   onClick,
   fileUrls,
+  channelName,
 }: BodyMessageProps) => {
   const {
     createdAt,
@@ -43,6 +45,7 @@ const BodyMessage = ({
   const { imageUrl, email, name, _id: userId } = member.userId;
 
   const timestamp = moment(createdAt).format("hh:mm");
+  const visibleName = channelName || name || email;
   const isPrevMessageFromSameUser =
     prevMessage && member._id === prevMessage?.member._id;
   const isNextMessageFromSameUser =
@@ -119,6 +122,7 @@ const BodyMessage = ({
         {fileUrls && isOnlyImages && <MessageImages images={fileUrls} />}
         {fileUrls && isOnlyFiles && <MessgeFiles files={fileUrls} />}
         <div className="mx-3 py-[6px]">
+          {!isNextMessageFromSameUser && <p className="text-purple-400">{visibleName}</p>}
           <span className="">{text}</span>
 
           <div

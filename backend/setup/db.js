@@ -5,4 +5,6 @@ module.exports = function () {
   mongoose.connect(config.get("db")).then(() => {
     console.log("mongodb connected");
   });
+
+ 
 };

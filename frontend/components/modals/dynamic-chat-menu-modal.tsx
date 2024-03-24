@@ -22,6 +22,7 @@ import { RxCross2 } from "react-icons/rx";
 import DynamicChatMenuButton from "./common/dynamic-chat-menu-button";
 import DynamicModalHeader from "./common/dynamic-modal-header";
 import { AnimatePresence } from "framer-motion";
+import Delimiter from "./common/delimiter";
 
 type Menu = "default" | "members" | "images";
 
@@ -87,7 +88,7 @@ const InitialMenu = ({ setCurrentMenu, onCrossClick }: InitialMenuProps) => {
           count={chat?.members.length}
           imageUrl={chat.imageUrl}
         />
-        <div className="bg-gray-200/50 w-full h-[10px] "></div>
+        <Delimiter/>
         <div className="flex flex-col">
           <DynamicChatMenuButton name="1568 photos" Icon={<SlPicture />} />
           <DynamicChatMenuButton name="videos" Icon={<TbPhoto />} />
@@ -98,15 +99,18 @@ const InitialMenu = ({ setCurrentMenu, onCrossClick }: InitialMenuProps) => {
           <DynamicChatMenuButton name="GIFs" />
         </div>
         <div className="bg-gray-6600/50 w-full h-[10px] "></div>
+        <Delimiter/>
         <div
           onClick={() => setCurrentMenu("members")}
           className={cn(
             "w-full cursor-pointer hover:bg-gray-100 h-[40px] flex justify-left items-center text-gray-800"
           )}
         >
+          
           <div className="ml-6 mr-8 flex justify-center text-[20px]  ">
             null
           </div>
+          
           <p className="w-full text-[14px]  font-semibold">
             {chat.members.length} MEMBERS
           </p>

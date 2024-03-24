@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  AnimationControls,
-  TargetAndTransition,
-  Variants,
-  motion,
-} from "framer-motion";
+import { motion } from "framer-motion";
 
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "@nextui-org/react";
@@ -26,7 +21,6 @@ const variants = {
   slide: { x: 90, opacity: 0 },
   fade: { x: 0, opacity: 0 },
 };
-
 
 interface TestP {
   children: ReactNode;

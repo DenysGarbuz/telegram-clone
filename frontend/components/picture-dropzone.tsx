@@ -34,8 +34,9 @@ const PictureDropzone = ({
       <div
         {...getRootProps()}
         className={cn(
-          "rounded-full bg-light-200 w-[80px] h-[80px] m-auto flex items-center justify-center text-white text-[41px] hover:bg-light-200/90 cursor-pointer relative ",
-          className
+          "rounded-full bg-light-200 m-auto flex items-center justify-center text-white text-[41px] hover:bg-light-200/90 cursor-pointer relative ",
+          className,
+          !className && "w-[80px] h-[80px]"
         )}
       >
         <input {...getInputProps()} />

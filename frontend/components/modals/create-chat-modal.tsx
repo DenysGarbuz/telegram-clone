@@ -29,7 +29,7 @@ const CreateChatModal = () => {
   const isModalOpen = isOpen && types.includes("createFolder");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [groupName, setGroupName] = useState("");
-  const [image, setImage] = useState<File | null>(null);
+  const [image, setImage] = useState<string | null>(null);
   const dispatch = useAppDispatch();
   const token = useToken();
 
@@ -97,8 +97,8 @@ interface InitialInterfaceProps {
   onNext: () => void;
   value: string;
   onChange: (groupName: string) => void;
-  image: File | null;
-  setImage: (image: File) => void;
+  image: string | null;
+  setImage: (image: string) => void;
 }
 
 const InitialInterface = ({
@@ -123,9 +123,15 @@ const InitialInterface = ({
         </PopoverWrapper>
       </div>
       <div className="w-full flex h-full justify-center ">
-        <PictureDropzone image={image} setImage={setImage} />
+        <div className="w-[230px]">
+          <PictureDropzone
+            image={image}
+            setImage={(file) => setImage(URL.createObjectURL(file))}
+          />
+        </div>
         <div className="flex flex-col w-full justify-center pr-7">
           <UnderlinedInput
+            autoFocus
             id="name"
             label="Group name"
             value={value}

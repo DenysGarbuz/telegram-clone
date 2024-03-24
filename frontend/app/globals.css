@@ -8,8 +8,18 @@ body,
   height: 100%;
 }
 
+.mention_gradient {
+  border-top: 1px solid 30%;
+  border-image-slice: 1;
+  border-image: linear-gradient(
+    to bottom,
+    rgb(202, 9, 19) 50%,
+    rgb(4, 37, 102) 50%,
+  );
+}
+
 .form-btn {
-  @apply rounded-lg w-full font-medium h-12 text-white;
+  @apply rounded-lg w-full font-medium h-12 text-white bg-gray-200;
 }
 
 .auth-form {
@@ -33,8 +43,7 @@ body,
   left: -30px;
   bottom: 0;
   border-bottom-right-radius: 60%;
-  
-  
+
   z-index: -1;
   box-shadow: 20px 0 0 0 white;
 }
