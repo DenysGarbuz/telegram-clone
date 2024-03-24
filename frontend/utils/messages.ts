@@ -35,6 +35,7 @@ export const sendMessage = async ({
 }) => {
   console.log("MEMBER inside CHATINPUT", member);
 
+
   if (text === "" && !files) return;
   let fileObjects = null;
   if (files) {

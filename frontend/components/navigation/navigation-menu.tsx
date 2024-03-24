@@ -71,17 +71,22 @@ const Menu = () => {
             />
             <MenuItem
               Icon={<TbGenderDemigirl />}
-              name="Kseniya "
+              name="New Channel"
               type="createFolder"
             />
             <MenuItem
               Icon={<RiGroupLine />}
-              name="New Gruop"
+              name="Contacts"
               type="createFolder"
             />
             <MenuItem
               Icon={<RiGroupLine />}
-              name="New Gruop"
+              name="Calls"
+              type="createFolder"
+            />
+            <MenuItem
+              Icon={<RiGroupLine />}
+              name="Saved Messages"
               type="createFolder"
             />
             <MenuItem
