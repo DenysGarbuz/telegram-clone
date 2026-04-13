@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const { User, validate } = require("../models/User");
 const jwt = require("jsonwebtoken");
 const env = require("../config/env");
+const { authCookieOptions } = require("../utils/cookies");
 const router = express.Router();
 
 router.post("/", async (req, res) => {
@@ -12,7 +13,7 @@ router.post("/", async (req, res) => {
     return res.status(401).json({ error: error.errors });
   }
 
-  let user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
     return res
@@ -30,16 +31,8 @@ router.post("/", async (req, res) => {
   const refreshToken = user.generateRefreshToken();
 
   return res
-    .cookie("accessToken", accessToken, {
-      httpOnly: true,
-      sameSite: "none",
-      secure: env.cookieSecure,
-    })
-    .cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      sameSite: "none",
-      secure: env.cookieSecure,
-    })
+    .cookie("accessToken", accessToken, authCookieOptions)
+    .cookie("refreshToken", refreshToken, authCookieOptions)
     .sendStatus(200);
 });
 
@@ -65,18 +58,13 @@ router.get("/refresh", async (req, res) => {
     const accessToken = user.generateAccessToken();
 
     return res
-      .cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: env.cookieSecure,
-        sameSite: "None",
-      })
+      .cookie("accessToken", accessToken, authCookieOptions)
       .json({ accessToken });
   } catch (error) {
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({ error: "Unauthorized: Token has expired" });
-    } else {
-      return res.status(401).json({ error: "Unauthorized: Invalid token" });
     }
+    return res.status(401).json({ error: "Unauthorized: Invalid token" });
   }
 });
 

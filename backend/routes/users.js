@@ -1,13 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const _ = require("lodash");
 const auth = require("../middleware/auth");
-const { v4: uuidv4 } = require("uuid");
 
 const { User, validate } = require("../models/User");
-const credentials = require("../middleware/credentials");
-const env = require("../config/env");
+const { authCookieOptions } = require("../utils/cookies");
 const logger = require("../utils/logger");
 
 router.get("/", [auth], async (req, res) => {
@@ -16,9 +13,9 @@ router.get("/", [auth], async (req, res) => {
   const user = await User.findById(userId, "-password -refreshId");
 
   if (!user) {
-    res.status(400).json({ error: "User not exists" });
+    return res.status(400).json({ error: "User not exists" });
   }
-  res.json(user);
+  return res.json(user);
 });
 
 router.post("/", async (req, res) => {
@@ -47,20 +44,12 @@ router.post("/", async (req, res) => {
     const refreshToken = user.generateRefreshToken();
 
     return res
-      .cookie("accessToken", accessToken, {
-        httpOnly: true,
-        sameSite: "none",
-        secure: env.cookieSecure,
-      })
-      .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        sameSite: "none",
-        secure: env.cookieSecure,
-      })
+      .cookie("accessToken", accessToken, authCookieOptions)
+      .cookie("refreshToken", refreshToken, authCookieOptions)
       .sendStatus(200);
   } catch (error) {
     logger.error({ err: error }, "user registration failed");
-    res.status(500).send("Internal server error");
+    return res.status(500).send("Internal server error");
   }
 });
 
