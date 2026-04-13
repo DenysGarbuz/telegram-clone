@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const Roles = require("../roles");
 const Rights = require("../rights");
 
 const memberSchema = new mongoose.Schema(

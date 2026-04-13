@@ -4,7 +4,6 @@ const router = express.Router();
 
 const Folder = require("../models/Folder");
 const { User } = require("../models/User");
-const Member = require("../models/Member");
 const validateId = require("../utils/validateId");
 
 router.get("/", [auth], async (req, res) => {
