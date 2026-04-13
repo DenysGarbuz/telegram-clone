@@ -43,6 +43,7 @@ module.exports = function (server) {
       "message:add",
       async ({ text, chatId, memberId, messageReplyToId, fakeId, files }) => {
         const chat = await Chat.findById(chatId);
+        if (!chat) return;
 
         let fileUrls = null;
         if (files && files.length > 0) {

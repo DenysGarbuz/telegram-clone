@@ -2,7 +2,6 @@ const express = require("express");
 const auth = require("../middleware/auth");
 const router = express.Router();
 
-const Channel = require("../models/Chat");
 const Folder = require("../models/Folder");
 const { User } = require("../models/User");
 const Member = require("../models/Member");

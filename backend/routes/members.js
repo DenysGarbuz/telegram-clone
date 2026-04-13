@@ -2,18 +2,9 @@ const express = require("express");
 const auth = require("../middleware/auth");
 const router = express.Router();
 
-const Channel = require("../models/Chat");
-const { User } = require("../models/User");
 const Member = require("../models/Member");
-const validateId = require("../utils/validateId");
-const Roles = require("../roles");
 const Rights = require("../rights");
 const Chat = require("../models/Chat");
-
-router.post("/", [auth], async (req, res) => {
-  const userId = req.user._id;
-  const channelId = req.query.channelId;
-});
 
 router.post("/rights/delete", [auth], async (req, res) => {
   const memberId = req.query.memberId;
