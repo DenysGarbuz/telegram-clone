@@ -9,8 +9,9 @@ interface ClientToServer {
   joining: (chatId: string) => void;
   joined: (chatId: string) => void;
   leaving: (chatId: string) => void;
-  "message:add": ({}: any) => void;
-  "message:edit": ({}: any) => void;
+  "message:add": (payload: { newMessage: Message; fakeId: string }) => void;
+  "message:edit": (message: Message) => void;
+  "message:delete": (deletedMessagesIds: string[]) => void;
 }
 interface MySocket extends Socket<ClientToServer> {
   currentChatId: string;

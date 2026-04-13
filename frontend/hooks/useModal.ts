@@ -1,4 +1,4 @@
-import { actions } from "../store/modal/modalSlice";
+import { actions, ModalData } from "../store/modal/modalSlice";
 import { useAppDispatch, useAppSelector } from "./store";
 import { ModalType } from "@/types";
 
@@ -6,7 +6,7 @@ const useModal = () => {
   const dispatch = useAppDispatch();
   const { openModals, isOpen } = useAppSelector((store) => store.modal);
 
-  const onOpen = (type: ModalType, data?: any) => {
+  const onOpen = (type: ModalType, data?: ModalData) => {
     dispatch(actions.onOpen({ type, data }));
   };
 

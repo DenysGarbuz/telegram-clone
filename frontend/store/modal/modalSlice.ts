@@ -3,8 +3,10 @@ import { ModalType } from "@/types";
 
 
 
+export type ModalData = Record<string, unknown>;
+
 interface State {
-  openModals: {type: ModalType, data?: any}[];
+  openModals: { type: ModalType; data?: ModalData }[];
   isOpen: boolean;
 }
 
@@ -17,7 +19,10 @@ const modalSlice = createSlice({
   initialState,
   name: "modal",
   reducers: {
-    onOpen: (store, { payload }: PayloadAction<{type: ModalType, data?: {} }>) => {
+    onOpen: (
+      store,
+      { payload }: PayloadAction<{ type: ModalType; data?: ModalData }>
+    ) => {
       if (store.openModals.some(modal => modal.type === payload.type)) return;
       store.openModals = [...store.openModals, payload];
       store.isOpen = true;

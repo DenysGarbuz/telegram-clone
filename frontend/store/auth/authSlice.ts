@@ -43,7 +43,7 @@ const authSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(loginUser.rejected, (state, { payload }) => {
-        state.isError = payload;
+        state.isError = Boolean(payload);
       })
       //register
       .addCase(registerUser.pending, (state) => {
@@ -53,7 +53,7 @@ const authSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(registerUser.rejected, (state, { payload }) => {
-        state.isError = payload;
+        state.isError = Boolean(payload);
       });
   },
 });
@@ -77,12 +77,18 @@ export const loginUser = createAsyncThunk(
         },
         { withCredentials: true }
       );
-    } catch (error: any) {
-      if (error.response && error.response.data.message) {
-        return rejectWithValue(error.response.data.message);
-      } else {
-        return rejectWithValue(error.message);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as
+          | { error?: string | { message?: string }; message?: string }
+          | undefined;
+        const msg =
+          (typeof data?.error === "object" ? data?.error?.message : data?.error) ??
+          data?.message ??
+          error.message;
+        return rejectWithValue(msg);
       }
+      return rejectWithValue("Unknown error");
     }
   }
 );
@@ -102,12 +108,16 @@ export const registerUser = createAsyncThunk(
         },
         { withCredentials: true }
       );
-    } catch (error: any) {
-      if (error.response && error.response.data) {
-        return rejectWithValue(error.response.data.error);
-      } else {
-        return rejectWithValue("Erorr");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as
+          | { error?: string | { message?: string } }
+          | undefined;
+        const msg =
+          typeof data?.error === "object" ? data?.error?.message : data?.error;
+        return rejectWithValue(msg ?? "Error");
       }
+      return rejectWithValue("Error");
     }
   }
 );

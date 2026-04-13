@@ -49,6 +49,11 @@ export const ChatTypes = {
 
 export type ChatType = keyof typeof ChatTypes;
 
+export type MessagesPage = {
+  messages: Message[];
+  nextCursor: number | null;
+};
+
 export type ModalType =
   | "createFolder"
   | "deleteGroup"

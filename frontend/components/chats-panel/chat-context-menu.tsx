@@ -25,7 +25,7 @@ const ChatContextMenu = ({
   const { onOpen } = useModal();
 
   useEffect(() => {
-    const handleClickOutsideContextMenu = (e: any) => {
+    const handleClickOutsideContextMenu = (e: MouseEvent) => {
       if (isOpen && ref.current && !ref.current.contains(e.target as Node)) {
         onClose();
       }

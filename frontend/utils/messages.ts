@@ -1,7 +1,6 @@
-import { useSocket } from "@/components/providers/socket-provider";
-import { useChat } from "@/hooks/use-chat";
-import { Message, Member, User } from "@/types";
-import { QueryClient, useQueryClient } from "@tanstack/react-query";
+import { Message, Member, User, MessagesPage } from "@/types";
+import { InfiniteData, QueryClient } from "@tanstack/react-query";
+import { Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 
 export const extractNameOrEmail = (message: Message | null) => {
@@ -29,13 +28,10 @@ export const sendMessage = async ({
   user: User;
   chatId: string;
   queryClient: QueryClient;
-  socket: any;
+  socket: Socket | null;
   chatMode: string;
   messageInProcess: Message | null;
 }) => {
-  console.log("MEMBER inside CHATINPUT", member);
-
-
   if (text === "" && !files) return;
   let fileObjects = null;
   if (files) {
@@ -61,17 +57,19 @@ export const sendMessage = async ({
       chatMode === "reply" && messageInProcess ? messageInProcess : undefined,
   };
 
-  queryClient.setQueryData(["messages", chatId], (oldData: any) => {
-    const newPages = [...oldData.pages];
-    newPages[0] = {
-      ...newPages[0],
-      messages: [optimisticMessage, ...newPages[0].messages],
-    };
+  queryClient.setQueryData<InfiniteData<MessagesPage>>(
+    ["messages", chatId],
+    (oldData) => {
+      if (!oldData) return oldData;
+      const newPages = [...oldData.pages];
+      newPages[0] = {
+        ...newPages[0],
+        messages: [optimisticMessage, ...newPages[0].messages],
+      };
+      return { ...oldData, pages: newPages };
+    }
+  );
 
-    return { ...oldData, pages: newPages };
-  });
-
-  // console.log(queryClient.getQueryData(["messages", chatId]));
   socket?.emit("message:add", {
     fakeId,
     text,

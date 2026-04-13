@@ -1,10 +1,8 @@
 import { useSocket } from "@/components/providers/socket-provider";
-import { Member, Message, SelectedChat } from "@/types";
-import { useQueryClient } from "@tanstack/react-query";
+import { Message, MessagesPage, SelectedChat } from "@/types";
+import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useCurrentUser } from "./useCurrentUser";
-
-interface ChatSocketProps {}
 
 const useChatSocket = (selectedChat: SelectedChat | null) => {
   const { socket, isConnected } = useSocket();
@@ -33,9 +31,10 @@ const useChatSocket = (selectedChat: SelectedChat | null) => {
 
         console.log("isOwnerOfMessage", isOwner);
 
-        queryClient.setQueryData(
+        queryClient.setQueryData<InfiniteData<MessagesPage>>(
           ["messages", selectedChat?.id],
-          (oldData: any) => {
+          (oldData) => {
+            if (!oldData) return oldData;
             let newPages = [...oldData.pages];
 
             if (isOwner) {
@@ -81,9 +80,10 @@ const useChatSocket = (selectedChat: SelectedChat | null) => {
 
       console.log("isOwnerOfMessage", isOwner);
 
-      queryClient.setQueryData(
+      queryClient.setQueryData<InfiniteData<MessagesPage>>(
         ["messages", selectedChat?.id],
-        (oldData: any) => {
+        (oldData) => {
+          if (!oldData) return oldData;
           let newPages = [...oldData.pages];
 
           newPages = newPages.map((page) => ({
@@ -116,9 +116,10 @@ const useChatSocket = (selectedChat: SelectedChat | null) => {
     });
 
     socket?.on("message:delete", (deletedMessagesIds: string[]) => {
-      queryClient.setQueryData(
+      queryClient.setQueryData<InfiniteData<MessagesPage>>(
         ["messages", selectedChat?.id],
-        (oldData: any) => {
+        (oldData) => {
+          if (!oldData) return oldData;
           let newPages = [...oldData.pages];
 
           newPages = newPages.map((page) => ({
