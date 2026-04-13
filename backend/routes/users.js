@@ -7,7 +7,7 @@ const { v4: uuidv4 } = require("uuid");
 
 const { User, validate } = require("../models/User");
 const credentials = require("../middleware/credentials");
-const config = require("config");
+const env = require("../config/env");
 
 router.get("/", [auth], async (req, res) => {
   const userId = req.user._id;
@@ -49,12 +49,12 @@ router.post("/", async (req, res) => {
       .cookie("accessToken", accessToken, {
         httpOnly: true,
         sameSite: "none",
-        secure: config.get("isSecure"),
+        secure: env.cookieSecure,
       })
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
         sameSite: "none",
-        secure: config.get("isSecure"),
+        secure: env.cookieSecure,
       })
       .sendStatus(200);
   } catch (error) {

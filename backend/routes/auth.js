@@ -2,8 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const { User, validate } = require("../models/User");
 const jwt = require("jsonwebtoken");
-const config = require("config");
-const _ = require("lodash");
+const env = require("../config/env");
 const router = express.Router();
 
 router.post("/", async (req, res) => {
@@ -34,12 +33,12 @@ router.post("/", async (req, res) => {
     .cookie("accessToken", accessToken, {
       httpOnly: true,
       sameSite: "none",
-      secure: config.get("isSecure"),
+      secure: env.cookieSecure,
     })
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
       sameSite: "none",
-      secure: config.get("isSecure"),
+      secure: env.cookieSecure,
     })
     .sendStatus(200);
 });
@@ -52,7 +51,7 @@ router.get("/refresh", async (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(refreshToken, config.get("jwtPrivateKey"));
+    const decoded = jwt.verify(refreshToken, env.jwtPrivateKey);
 
     const user = await User.findOne(
       { refreshId: decoded.refreshId },
@@ -68,7 +67,7 @@ router.get("/refresh", async (req, res) => {
     return res
       .cookie("accessToken", accessToken, {
         httpOnly: true,
-        secure: config.get("isSecure"),
+        secure: env.cookieSecure,
         sameSite: "None",
       })
       .json({ accessToken });

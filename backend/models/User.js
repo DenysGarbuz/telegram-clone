@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { object, string } = require("yup");
 const validateSchema = require("../utils/validateSchema");
 const jwt = require("jsonwebtoken");
-const config = require("config");
+const env = require("../config/env");
 const { v4: uuidv4 } = require("uuid");
 
 const userSchema = new mongoose.Schema(
@@ -64,16 +64,16 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.methods.generateAccessToken = function() {
+userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     { _id: this._id, name: this.name, email: this.email },
-    config.get("jwtPrivateKey"),
+    env.jwtPrivateKey,
     { expiresIn: "15m" }
   );
 };
 
 userSchema.methods.generateRefreshToken = function () {
-  return jwt.sign({ refreshId: this.refreshId }, config.get("jwtPrivateKey"), {
+  return jwt.sign({ refreshId: this.refreshId }, env.jwtPrivateKey, {
     expiresIn: "3h",
   });
 };

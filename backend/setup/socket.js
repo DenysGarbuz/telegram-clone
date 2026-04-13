@@ -1,24 +1,17 @@
-const User = require("../models/User");
 const validateId = require("../utils/validateId");
 const jwt = require("jsonwebtoken");
 const { saveMultipleFiles } = require("./s3client");
+const env = require("../config/env");
 
 module.exports = function (server) {
   const { Server } = require("socket.io");
-  const config = require("config");
   const Message = require("../models/Message");
   const Member = require("../models/Member");
   const Chat = require("../models/Chat");
-  const { User } = require("../models/User");
-
-  if (!config.has("frontendUrl")) {
-    console.error("frontendUrl is missing");
-    process.exit(1);
-  }
 
   const io = new Server(server, {
     cors: {
-      origin: config.get("frontendUrl"),
+      origin: env.frontendUrl,
     },
   });
 
@@ -33,7 +26,7 @@ module.exports = function (server) {
   io.use(async (socket, next) => {
     const accessToken = socket.handshake.query.token;
     try {
-      const decoded = jwt.verify(accessToken, config.get("jwtPrivateKey"));
+      const decoded = jwt.verify(accessToken, env.jwtPrivateKey);
 
       socket.user = decoded;
       next();

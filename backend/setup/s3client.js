@@ -1,19 +1,17 @@
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
-const config = require("config");
+const env = require("../config/env");
 
-const clientConfig = {
-  region: "eu-north-1",
+const client = new S3Client({
+  region: env.aws.region,
   credentials: {
-    accessKeyId: "***REMOVED_AWS_KEY***",
-    secretAccessKey: "***REMOVED_AWS_SECRET***",
+    accessKeyId: env.aws.accessKeyId,
+    secretAccessKey: env.aws.secretAccessKey,
   },
-};
+});
 
-const client = new S3Client(clientConfig);
-
-const BUCKET_NAME = config.get("bucketName");
+const BUCKET_NAME = env.aws.bucketName;
 const CHATS_FOLDER = "chats/";
-const FILE_BASE_URL = `https://${BUCKET_NAME}.s3.eu-north-1.amazonaws.com/`;
+const FILE_BASE_URL = `https://${BUCKET_NAME}.s3.${env.aws.region}.amazonaws.com/`;
 
 const generateKey = (folder, id, fileName) => {
   const randomNumber = Math.floor(Math.random() * 90000 + 10000);

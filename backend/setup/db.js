@@ -1,10 +1,8 @@
 module.exports = function () {
   const mongoose = require("mongoose");
-  const config = require("config");
+  const env = require("../config/env");
 
-  mongoose.connect(config.get("db")).then(() => {
+  mongoose.connect(env.mongodbUrl).then(() => {
     console.log("mongodb connected");
   });
-
- 
 };

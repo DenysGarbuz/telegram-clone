@@ -1,19 +1,9 @@
 module.exports = function server(app) {
-  const config = require("config");
   const cors = require("cors");
   const express = require("express");
   const cookieParser = require("cookie-parser");
   const morgan = require("morgan");
-
-  if (!config.has("jwtPrivateKey")) {
-    console.error("jwt private key is missing");
-    process.exit(1);
-  }
-
-  if (!config.has("frontendUrl")) {
-    console.error("frontend url is missing");
-    process.exit(1);
-  }
+  const env = require("../config/env");
 
   const usersRouter = require("../routes/users");
   const authRouter = require("../routes/auth");
@@ -21,10 +11,9 @@ module.exports = function server(app) {
   const folderRouter = require("../routes/folders");
   const messagesRouter = require("../routes/messages");
   const membersRouter = require("../routes/members");
-  const credentials = require("../middleware/credentials");
 
   const corsOptions = {
-    origin: config.get("frontendUrl"),
+    origin: env.frontendUrl,
     credentials: true,
   };
 
