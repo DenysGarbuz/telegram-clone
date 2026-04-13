@@ -1,81 +1,62 @@
 const express = require("express");
 
 const auth = require("../middleware/auth");
-const validateId = require("../utils/validateId");
+const { validateObjectIds } = require("../middleware/validate");
+const { asyncHandler } = require("../middleware/errorHandler");
+const ApiError = require("../utils/ApiError");
+
 const { User } = require("../models/User");
 const Chat = require("../models/Chat");
 const Message = require("../models/Message");
-const Member = require("../models/Member");
+
 const router = express.Router();
 
 const MESSAGES_AMOUNT = 22;
 
-router.get("/:chatId", [auth], async (req, res) => {
-  const userId = req.user._id;
-  const chatId = req.params.chatId;
-  const cursor = req.query.cursor;
+router.get(
+  "/:chatId",
+  [auth, validateObjectIds(["chatId"])],
+  asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const { chatId } = req.params;
+    const cursor = parseInt(req.query.cursor, 10) || 0;
 
-  const idError = validateId("chatId", chatId);
-  if (idError) {
-    return res
-      .status(400)
-      .json({ error: { code: "INVALID_ID", message: idError.error } });
-  }
+    const user = await User.findById(userId);
+    if (!user) throw ApiError.notFound("USER_NOT_FOUND", "User does not exist");
 
-  const user = await User.findById(userId);
-  if (!user) {
-    return res.status(404).json({ error: "USER does not exists" });
-  }
+    const chat = await Chat.findById(chatId).populate("members");
+    if (!chat) throw ApiError.notFound("CHAT_NOT_FOUND", "Chat does not exist");
 
-  const chat = await Chat.findById(chatId).populate("members");
-  if (!chat) {
-    return res.status(404).json({ error: "CHAT does not exists" });
-  }
-
-  if (chat.access === "private") {
-    if (userId !== chat.userId.toString()) {
+    if (chat.access === "private" && userId !== chat.userId.toString()) {
       const isMember = chat.members.find(
-        (member) => member.userId.toString() === userId.toString()
+        (m) => m.userId.toString() === userId.toString()
       );
-
-      if (!isMember) {
-        return res.status(400).json({ error: "USER is not an MEMBER of CHAT" });
-      }
+      if (!isMember)
+        throw ApiError.forbidden("NOT_MEMBER", "User is not a member of chat");
     }
-  }
 
-  const messages = await Message.find({ chatId })
-    .sort({ createdAt: -1 })
-    .skip(cursor * MESSAGES_AMOUNT)
-    .limit(MESSAGES_AMOUNT)
-    .populate({
-      path: "member",
-      select: "_id userId",
-      populate: {
-        path: "userId",
-        select: "imageUrl email name",
-      },
-    })
-    .populate({
-      path: "messageReplyTo",
-      populate: {
+    const messages = await Message.find({ chatId })
+      .sort({ createdAt: -1 })
+      .skip(cursor * MESSAGES_AMOUNT)
+      .limit(MESSAGES_AMOUNT)
+      .populate({
         path: "member",
         select: "_id userId",
+        populate: { path: "userId", select: "imageUrl email name" },
+      })
+      .populate({
+        path: "messageReplyTo",
         populate: {
-          path: "userId",
-          select: "imageUrl email name",
+          path: "member",
+          select: "_id userId",
+          populate: { path: "userId", select: "imageUrl email name" },
         },
-      },
-    });
+      });
 
-  let nextCursor = null;
+    const nextCursor = messages.length === MESSAGES_AMOUNT ? cursor + 1 : null;
 
-  if (messages.length === MESSAGES_AMOUNT) {
-    nextCursor = parseInt(cursor) + 1;
-  }
-
-  return res.json({ messages, nextCursor });
-});
-
+    return res.json({ messages, nextCursor });
+  })
+);
 
 module.exports = router;
