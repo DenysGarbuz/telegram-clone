@@ -15,9 +15,11 @@ router.get("/:chatId", [auth], async (req, res) => {
   const chatId = req.params.chatId;
   const cursor = req.query.cursor;
 
-  const error = validateId("chatId", chatId);
-  if (error) {
-    return res.status(400).json(error);
+  const idError = validateId("chatId", chatId);
+  if (idError) {
+    return res
+      .status(400)
+      .json({ error: { code: "INVALID_ID", message: idError.error } });
   }
 
   const user = await User.findById(userId);

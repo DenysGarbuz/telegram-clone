@@ -42,7 +42,9 @@ router.get("/url/:inviteUrl", [auth], async (req, res) => {
   const inviteUrl = req.params.inviteUrl;
 
   if (!inviteUrl) {
-    return res.status(400).json("INVITE URL is missing");
+    return res
+      .status(400)
+      .json({ error: { code: "INVITE_MISSING", message: "INVITE URL is missing" } });
   }
 
   const user = await User.findById(userId);
