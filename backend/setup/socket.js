@@ -1,8 +1,12 @@
-const validateId = require("../utils/validateId");
+const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const { saveMultipleFiles } = require("./s3client");
 const env = require("../config/env");
 const logger = require("../utils/logger");
+
+function isValidId(id) {
+  return id && mongoose.Types.ObjectId.isValid(id);
+}
 
 module.exports = function (server) {
   const { Server } = require("socket.io");
@@ -22,32 +26,72 @@ module.exports = function (server) {
     },
   });
 
-  io.use(async (socket, next) => {
+  // JWT auth middleware: runs once per socket connection
+  io.use((socket, next) => {
     const accessToken = socket.handshake.query.token;
+    if (!accessToken) {
+      return next(new Error("UNAUTHENTICATED"));
+    }
     try {
       const decoded = jwt.verify(accessToken, env.jwtPrivateKey);
       socket.user = decoded;
-      next();
-    } catch (error) {
-      logger.warn({ err: error.message }, "socket auth failed");
-      socket.disconnect();
+      return next();
+    } catch (err) {
+      logger.warn({ err: err.message }, "socket auth failed");
+      return next(new Error("UNAUTHENTICATED"));
     }
   });
 
+  /**
+   * Returns the caller's Member doc for `chatId` iff the user is a member
+   * or the chat is public. Returns null otherwise.
+   */
+  async function memberForUserAndChat(userId, chatId) {
+    if (!isValidId(chatId)) return null;
+    const chat = await Chat.findById(chatId).select("access userId");
+    if (!chat) return null;
+    const member = await Member.findOne({ userId, chatId });
+    if (member) return member;
+    if (chat.access === "public") {
+      // Public-chat observers can read but don't have a member doc — return a
+      // sentinel so the caller knows the room is joinable but not writable.
+      return { _id: null, isAdmin: false, rights: {} };
+    }
+    return null;
+  }
+
   io.on("connection", (socket) => {
-    socket.on("joining", (chatId) => {
-      socket.rooms.forEach((room) => socket.leave(room));
+    socket.on("joining", async (chatId) => {
+      const userId = socket.user && socket.user._id;
+      const member = await memberForUserAndChat(userId, chatId);
+      if (!member) {
+        socket.emit("error", {
+          code: "FORBIDDEN_ROOM",
+          message: "Not allowed to join this chat",
+        });
+        return;
+      }
+      socket.rooms.forEach((room) => {
+        if (room !== socket.id) socket.leave(room);
+      });
       socket.join(chatId);
       socket.emit("joined", chatId);
     });
 
     socket.on("leaving", (chatId) => {
-      socket.leave(chatId);
+      if (isValidId(chatId)) socket.leave(chatId);
     });
 
     socket.on(
       "message:add",
       async ({ text, chatId, memberId, messageReplyToId, fakeId, files }) => {
+        const userId = socket.user && socket.user._id;
+        if (!isValidId(chatId) || !isValidId(memberId)) return;
+
+        // Enforce that the sender really is the member they claim.
+        const callerMember = await Member.findOne({ userId, chatId });
+        if (!callerMember || callerMember._id.toString() !== memberId) return;
+
         const chat = await Chat.findById(chatId);
         if (!chat) return;
 
@@ -61,7 +105,9 @@ module.exports = function (server) {
           chatId,
           fileUrls,
           member: memberId,
-          messageReplyTo: messageReplyToId,
+          messageReplyTo: isValidId(messageReplyToId)
+            ? messageReplyToId
+            : undefined,
         });
 
         chat.messages.push(message._id);
@@ -75,20 +121,14 @@ module.exports = function (server) {
           .populate({
             path: "member",
             select: "_id userId",
-            populate: {
-              path: "userId",
-              select: "imageUrl email name",
-            },
+            populate: { path: "userId", select: "imageUrl email name" },
           })
           .populate({
             path: "messageReplyTo",
             populate: {
               path: "member",
               select: "_id userId",
-              populate: {
-                path: "userId",
-                select: "imageUrl email name",
-              },
+              populate: { path: "userId", select: "imageUrl email name" },
             },
           });
 
@@ -100,48 +140,29 @@ module.exports = function (server) {
     );
 
     socket.on("message:delete", async ({ chatId, messageIds }) => {
-      const userId = socket.user._id;
-
-      let error = validateId("chatId", chatId);
-      if (error) {
-        return;
-      }
-
-      error = validateId("messageId", messageIds);
-      if (error) {
-        return;
-      }
+      const userId = socket.user && socket.user._id;
+      if (!isValidId(chatId) || !Array.isArray(messageIds)) return;
+      if (!messageIds.every(isValidId)) return;
 
       const member = await Member.findOne({ userId, chatId });
-      if (!member) {
-        return res.status(404).json({ error: "MEMBER does not exists" });
-      }
+      if (!member) return;
 
-      const chat = await Chat.findById(chatId).populate("members");
-      if (!chat) {
-        return res.status(404).json({ error: "CHAT does not exists" });
-      }
+      const chat = await Chat.findById(chatId);
+      if (!chat) return;
 
       let deletedMessages = [];
 
       if (member.isAdmin && member.rights.canDeleteMessages) {
-        await Message.deleteMany({
-          _id: { $in: messageIds },
-          chatId,
-        });
-
+        await Message.deleteMany({ _id: { $in: messageIds }, chatId });
         deletedMessages = messageIds;
       } else {
         const messages = await Message.find({
           _id: { $in: messageIds },
           member: member._id,
         });
-        const messagesToDelete = [];
-        for (const message of messages) {
-          if (message.member.toString() === member._id.toString()) {
-            messagesToDelete.push(message._id);
-          }
-        }
+        const messagesToDelete = messages
+          .filter((m) => m.member.toString() === member._id.toString())
+          .map((m) => m._id);
 
         await Message.deleteMany({
           _id: { $in: messagesToDelete },
@@ -156,6 +177,17 @@ module.exports = function (server) {
     });
 
     socket.on("message:edit", async ({ messageId, chatId, text }) => {
+      const userId = socket.user && socket.user._id;
+      if (!isValidId(chatId) || !isValidId(messageId)) return;
+
+      const member = await Member.findOne({ userId, chatId });
+      if (!member) return;
+
+      // Can only edit own messages (no server-side admin override today).
+      const existing = await Message.findOne({ _id: messageId, chatId });
+      if (!existing) return;
+      if (existing.member.toString() !== member._id.toString()) return;
+
       const messageToAllMembers = await Message.findOneAndUpdate(
         { chatId, _id: messageId },
         { $set: { text } },
@@ -164,20 +196,14 @@ module.exports = function (server) {
         .populate({
           path: "member",
           select: "_id userId",
-          populate: {
-            path: "userId",
-            select: "imageUrl email name",
-          },
+          populate: { path: "userId", select: "imageUrl email name" },
         })
         .populate({
           path: "messageReplyTo",
           populate: {
             path: "member",
             select: "_id userId",
-            populate: {
-              path: "userId",
-              select: "imageUrl email name",
-            },
+            populate: { path: "userId", select: "imageUrl email name" },
           },
         });
 
