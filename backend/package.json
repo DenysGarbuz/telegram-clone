@@ -11,7 +11,17 @@
     "dev": "node --watch index.js",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
+  },
+  "jest": {
+    "setupFiles": [
+      "./__tests__/setup/env.js"
+    ],
+    "testTimeout": 30000,
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/__tests__/setup/"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -40,6 +50,9 @@
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
-    "prettier": "^3.8.2"
+    "jest": "^30.3.0",
+    "mongodb-memory-server": "^11.0.1",
+    "prettier": "^3.8.2",
+    "supertest": "^7.2.2"
   }
 }

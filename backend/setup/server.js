@@ -33,11 +33,14 @@ module.exports = function server(app) {
     credentials: true,
   };
 
+  const skipInTest = () => env.nodeEnv === "test";
+
   const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 300,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: skipInTest,
     message: {
       error: { code: "RATE_LIMITED", message: "Too many requests" },
     },
@@ -48,6 +51,7 @@ module.exports = function server(app) {
     max: 10,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: skipInTest,
     message: {
       error: { code: "RATE_LIMITED", message: "Too many auth attempts" },
     },
