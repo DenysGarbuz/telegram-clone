@@ -10,9 +10,15 @@ module.exports = function (server) {
   const Member = require("../models/Member");
   const Chat = require("../models/Chat");
 
+  const allowedOrigins = env.frontendUrl
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+
   const io = new Server(server, {
     cors: {
-      origin: env.frontendUrl,
+      origin: allowedOrigins,
+      credentials: true,
     },
   });
 
