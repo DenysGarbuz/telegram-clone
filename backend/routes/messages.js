@@ -15,8 +15,6 @@ router.get("/:chatId", [auth], async (req, res) => {
   const chatId = req.params.chatId;
   const cursor = req.query.cursor;
 
-  console.log(cursor);
-
   const error = validateId("chatId", chatId);
   if (error) {
     return res.status(400).json(error);

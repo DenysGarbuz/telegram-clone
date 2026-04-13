@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require("uuid");
 const { User, validate } = require("../models/User");
 const credentials = require("../middleware/credentials");
 const env = require("../config/env");
+const logger = require("../utils/logger");
 
 router.get("/", [auth], async (req, res) => {
   const userId = req.user._id;
@@ -58,8 +59,8 @@ router.post("/", async (req, res) => {
       })
       .sendStatus(200);
   } catch (error) {
+    logger.error({ err: error }, "user registration failed");
     res.status(500).send("Internal server error");
-    console.log(error);
   }
 });
 

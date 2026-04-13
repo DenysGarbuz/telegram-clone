@@ -56,7 +56,6 @@ router.post("/rights/delete", [auth], async (req, res) => {
 
   member.isAdmin = false;
   member.rights = Rights;
-  console.log(member);
   await member.save();
 
   return res.sendStatus(200);
@@ -129,7 +128,6 @@ router.post("/rights", [auth], async (req, res) => {
         ? rights.canAddNewAdmins ?? oldRights.canAddNewAdmins
         : oldRights.canAddNewAdmins,
   };
-  console.log(rights);
   if (!member.isAdmin) {
     member.isAdmin = true;
   }

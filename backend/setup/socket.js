@@ -2,6 +2,7 @@ const validateId = require("../utils/validateId");
 const jwt = require("jsonwebtoken");
 const { saveMultipleFiles } = require("./s3client");
 const env = require("../config/env");
+const logger = require("../utils/logger");
 
 module.exports = function (server) {
   const { Server } = require("socket.io");
@@ -15,54 +16,33 @@ module.exports = function (server) {
     },
   });
 
-  io.engine.on("connection", (socket) => {
-    console.log("A user connected at " + new Date());
-
-    socket.transport.on("upgrade", () => {
-      console.log("upgraded " + new Date());
-    });
-  });
-
   io.use(async (socket, next) => {
     const accessToken = socket.handshake.query.token;
     try {
       const decoded = jwt.verify(accessToken, env.jwtPrivateKey);
-
       socket.user = decoded;
       next();
     } catch (error) {
+      logger.warn({ err: error.message }, "socket auth failed");
       socket.disconnect();
-      console.log(error);
     }
   });
 
-  //start
   io.on("connection", (socket) => {
     socket.on("joining", (chatId) => {
       socket.rooms.forEach((room) => socket.leave(room));
       socket.join(chatId);
       socket.emit("joined", chatId);
-      console.log("joining to ", chatId);
     });
 
     socket.on("leaving", (chatId) => {
       socket.leave(chatId);
-      console.log("left: " + chatId);
     });
 
     socket.on(
       "message:add",
       async ({ text, chatId, memberId, messageReplyToId, fakeId, files }) => {
-        console.log(files);
-        console.log("received message: " + text + " " + chatId);
-        console.log("current rooms", socket.rooms);
-
         const chat = await Chat.findById(chatId);
-
-        // const error = validateId([memberId, messageReplyToId]);
-        // if (error) {
-        //   return;
-        // }
 
         let fileUrls = null;
         if (files && files.length > 0) {
@@ -105,8 +85,6 @@ module.exports = function (server) {
             },
           });
 
-        console.log(messageToAllMembers);
-
         io.to(chatId).emit("message:add", {
           newMessage: messageToAllMembers,
           fakeId,
@@ -117,19 +95,13 @@ module.exports = function (server) {
     socket.on("message:delete", async ({ chatId, messageIds }) => {
       const userId = socket.user._id;
 
-      console.log(userId);
-      console.log(chatId);
-      console.log(messageIds);
-
       let error = validateId("chatId", chatId);
       if (error) {
-        console.log(error);
         return;
       }
 
       error = validateId("messageId", messageIds);
       if (error) {
-        console.log(error);
         return;
       }
 
@@ -174,7 +146,6 @@ module.exports = function (server) {
       }
 
       io.to(chatId).emit("message:delete", deletedMessages);
-      console.log("completed");
     });
 
     socket.on("message:edit", async ({ messageId, chatId, text }) => {

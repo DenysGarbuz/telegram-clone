@@ -110,10 +110,6 @@ router.post("/", [auth, upload.single("image")], async (req, res) => {
   const image = req.file;
   const userId = req.user._id;
 
-  // console.log(image);
-  // console.log(type);
-  // console.log(name);
-
   if (!type) {
     return res.status(400).json({ error: "Chat TYPE is missing" });
   }
@@ -202,8 +198,6 @@ router.post("/join/:chatId", [auth], async (req, res) => {
     await member.save();
   }
 
-  console.log(member);
-
   user.members.push(member._id);
   user.chats.push(chat._id);
   chat.members.push(member._id);
@@ -217,7 +211,6 @@ router.post("/join/:chatId", [auth], async (req, res) => {
 router.post("/leave/:chatId", [auth], async (req, res) => {
   const userId = req.user._id;
   const chatId = req.params.chatId;
-  console.log(chatId);
 
   const error = validateId("chatId", chatId);
   if (error) {
